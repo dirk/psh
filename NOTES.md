@@ -1,6 +1,6 @@
 ## psh: the programmer's shell
 
-```shell
+```bash
 # All variables prefixed with $
 # Variables starting with an upper case character are automatically
 # global environmental variables (and all subsequent characters must be
