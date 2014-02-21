@@ -1,5 +1,7 @@
 ## psh: the programmer's shell
 
+### Syntax
+
 ```bash
 # All variables prefixed with $
 # Variables starting with an upper case character are automatically
@@ -17,6 +19,8 @@ set $name "value"
 # 2. maybe do something more programmatic (bash-style)
 $name = "value"
 $PATH = "/usr/local/bin:$PATH" # This is the same as `export $PATH=/usr/local/bin:$PATH` in bash
-
-
 ```
+
+### Implementation
+
+Need to define an intelligent parsing architecture for handling parsing, hinting, and evaluating input.
