@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <termios.h>
 
+#include "psh.h"
+#include "reader.h"
+#include "../deps/linenoise/linenoise.h"
+
 struct termios previous_attributes;
 void reset_mode() {
   tcsetattr(STDIN_FILENO, TCSANOW, &previous_attributes);
@@ -21,26 +25,20 @@ void set_mode() {
   
   tcgetattr(STDIN_FILENO, &attr);
   // Disable canonical and echo
-  attr.c_lflag = attr.c_lflag & ~(ICANON | ECHO);
+  attr.c_lflag &= ~(ICANON | ECHO);
+  attr.c_iflag &= ~(IXON | IXOFF);
   attr.c_cc[VMIN] = 1;
   attr.c_cc[VTIME] = 0;
   tcsetattr(STDIN_FILENO, TCSAFLUSH, &attr);
 }
 
 void setup() {
-  // Switch to raw mode
-  //system("/bin/stty raw");
   set_mode();
-}
-void teardown() {
-  // Return to regular mode
-  // TODO: Record original TTY (/bin/stty -g) on shell start and return to that on shell exit.
-  //system("/bin/stty sane");
+  setup_reader();
 }
 
 void sig_handler(int s) {
   if(s == SIGINT) {
-    teardown();
     printf("\nGoodbye.\n");
     exit(0);
   }
@@ -53,12 +51,8 @@ int main(int argc, char **argv) {
   }
   setup();
   
-  char *c = malloc(sizeof(char));
   while(1) {
-    // Read single character
-    read(STDIN_FILENO, c, 1);
-    if(*c == 3) sig_handler(SIGINT);
-    printf("c = %d\n", *c);
+    read_line();
   }
   
   return 0;
