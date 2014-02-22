@@ -10,7 +10,7 @@
 $local
 $ENV
 $PATH
-# Variable scoping *shouldn't* be hard. Let's maybe have `global` and `local`
+# Variable scoping *shouldn't* be hard. Let's maybe have 'global' and 'local'
 # keywords to adjust scoping in functions/subroutines/etc.
 
 # Variable assignment options
@@ -24,3 +24,4 @@ $PATH = "/usr/local/bin:$PATH" # This is the same as `export $PATH=/usr/local/bi
 ### Implementation
 
 Need to define an intelligent parsing architecture for handling parsing, hinting, and evaluating input.
+

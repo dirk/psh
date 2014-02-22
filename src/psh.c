@@ -3,20 +3,17 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <termios.h>
+#include <strings.h>
 
 #include "psh.h"
 #include "reader.h"
 
 struct termios previous_attributes;
 void reset_mode() {
-  return;
   tcsetattr(STDIN_FILENO, TCSANOW, &previous_attributes);
 }
 void set_mode() {
-  return;
-  
   struct termios attr;
-  
   if(!isatty(STDIN_FILENO)) {
     fprintf(stderr, "Not a TTY.\n");
     exit(1);
@@ -35,11 +32,21 @@ void set_mode() {
 }
 
 void setup() {
-  set_mode();
   setup_reader();
 }
 void teardown() {
   teardown_reader();
+}
+
+char *get_history_path() {
+  static char *hp;
+  if(hp != NULL) return hp;
+  hp = malloc(sizeof(char) * 1024); // TODO: Maybe fix hard-coding
+  hp[0] = '\0';
+  strcat(hp, getenv("HOME"));
+  strcat(hp, "/");
+  strcat(hp, PSH_HISTORY);
+  return hp;
 }
 
 void sig_handler(int s) {
@@ -57,7 +64,7 @@ int main(int argc, char **argv) {
   }
   setup();
   
-  while(1) {
+  while(true) {
     read_line();
   }
   

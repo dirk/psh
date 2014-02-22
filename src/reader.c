@@ -11,14 +11,16 @@
 
 void setup_reader() {
   // Readline
+  rl_prep_terminal(0);
   using_history();
-  int errno = read_history(PSH_HISTORY);
-  // fprintf(stdout, "Read history: %d\n", errno);
+  int errno = read_history(get_history_path());
+  if(errno != 0) fprintf(stderr, "Error %d reading history!\n", errno);
 }
 void teardown_reader() {
   // fputs("Writing history... ", stdout);
   // fflush(stdout);
-  write_history(PSH_HISTORY);
+  write_history(get_history_path());
+  rl_deprep_terminal();
   // fputs("done.\n", stdout);
   // fflush(stdout);
 }

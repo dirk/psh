@@ -1,3 +1,5 @@
+#ifndef READER_H
+#define READER_H
 
 #define CESCAPE 27
 
@@ -10,3 +12,4 @@ void teardown_reader();
 
 void read_line();
 
+#endif
