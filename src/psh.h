@@ -1,3 +1,5 @@
+#define PSH_HISTORY "/Users/dirk/.psh_history"
+
 typedef enum {false, true} bool;
 
 void set_mode();

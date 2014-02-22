@@ -36,11 +36,15 @@ void set_mode() {
 
 void setup() {
   set_mode();
-  // setup_reader();
+  setup_reader();
+}
+void teardown() {
+  teardown_reader();
 }
 
 void sig_handler(int s) {
   if(s == SIGINT) {
+    teardown();
     printf("\nGoodbye.\n");
     exit(0);
   }

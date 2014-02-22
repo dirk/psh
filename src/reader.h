@@ -6,5 +6,7 @@ char *reader_buffer;
 int   reader_cursor;
 
 void setup_reader();
+void teardown_reader();
+
 void read_line();
 
