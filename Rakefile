@@ -1,7 +1,9 @@
 
+# LDFLAGS = '-lncurses'
+
 desc "Compile"
 file 'psh' => ['src/psh.o'] do |t|
-  sh "cc -o #{t.name} #{t.prerequisites.join ' '}"
+  sh "cc -o #{t.name} #{t.prerequisites.join ' '} #{LDFLAGS}"
 end
 
 rule '.o' => ['.c'] do |t|
