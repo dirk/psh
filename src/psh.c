@@ -6,13 +6,15 @@
 
 #include "psh.h"
 #include "reader.h"
-#include "../deps/linenoise/linenoise.h"
 
 struct termios previous_attributes;
 void reset_mode() {
+  return;
   tcsetattr(STDIN_FILENO, TCSANOW, &previous_attributes);
 }
 void set_mode() {
+  return;
+  
   struct termios attr;
   
   if(!isatty(STDIN_FILENO)) {
@@ -34,7 +36,7 @@ void set_mode() {
 
 void setup() {
   set_mode();
-  setup_reader();
+  // setup_reader();
 }
 
 void sig_handler(int s) {
