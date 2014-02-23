@@ -9,7 +9,7 @@ task 'deps' => ['deps/linenoise/linenoise.o']
 desc "Compile"
 file 'psh' => [
   # Source
-  'src/psh.o', 'src/reader.o',
+  'src/psh.o', 'src/reader.o', 'src/parser.o',
   # Deps
   # 'deps/linenoise/linenoise.o'
 ] do |t|

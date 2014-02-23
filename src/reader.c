@@ -8,6 +8,7 @@
 
 #include "psh.h"
 #include "reader.h"
+#include "parser.h"
 
 void setup_reader() {
   // Readline
@@ -29,6 +30,8 @@ void read_line() {
   char *line;
   while((line = readline("psh> ")) != NULL) {
     printf("echo: %s\n", line);
+    
+    parse_line(line);
     
     add_history(line); free(line);
   }
