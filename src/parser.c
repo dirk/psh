@@ -11,7 +11,9 @@ token_list *new_token_list() {
   return tl;
 }
 
-token_list *parse_line(char *line) {
+
+
+token_list *scan_line(char *line) {
   token_list *tl = new_token_list();
   // Position in the token list
   int token_index = 0;

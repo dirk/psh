@@ -31,7 +31,7 @@ void read_line() {
   while((line = readline("psh> ")) != NULL) {
     // printf("echo: %s\n", line);
     
-    token_list *list = parse_line(line);
+    token_list *list = scan_line(line);
     
     print_token_list(list);
     printf("\n");

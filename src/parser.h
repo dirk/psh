@@ -32,7 +32,7 @@ typedef struct token_list {
   token** tokens;
 } token_list;
 
-token_list *parse_line(char *line);
+token_list *scan_line(char *line);
 bool parse_token(char**, token**);
 
 token_word *consume_word(char**);
