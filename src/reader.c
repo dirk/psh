@@ -29,9 +29,12 @@ void teardown_reader() {
 void read_line() {
   char *line;
   while((line = readline("psh> ")) != NULL) {
-    printf("echo: %s\n", line);
+    // printf("echo: %s\n", line);
     
-    parse_line(line);
+    token_list *list = parse_line(line);
+    
+    print_token_list(list);
+    printf("\n");
     
     add_history(line); free(line);
   }

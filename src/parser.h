@@ -2,10 +2,12 @@
 #define PARSER_H
 
 #define TOKEN_LIST_SIZE 1024
+#define MAX_STRING_LENGTH 1024
 
 
 typedef enum {
-  KEYWORD,
+  TKEYWORD,
+  TSTRING,
   TOKENS
 } token_type;
 
@@ -21,6 +23,10 @@ typedef struct token_keyword {
   token_type type;
   char      *name;
 } token_keyword;
+typedef struct token_string {
+  token_type type;
+  char      *contents;
+} token_string;
 
 typedef struct token_list {
   token** tokens;
@@ -28,5 +34,9 @@ typedef struct token_list {
 
 token_list *parse_line(char *line);
 bool parse_token(char**, token**);
+
+char consume_string_escape_sequence(char**);
+
+void print_token_list(token_list* tl);
 
 #endif
