@@ -3,7 +3,7 @@
 
 #define TOKEN_LIST_SIZE 1024
 #define MAX_WORD_LENGTH 1024
-
+#define TREE_SEQUENCE_SIZE 1024
 
 typedef enum {
   TKEYWORD,
@@ -12,10 +12,14 @@ typedef enum {
 } token_type;
 
 typedef enum {
-  TSEQUENCE,
   TCOMMAND,
   TREES
 } tree_type;
+
+typedef enum {
+  SCOLON,
+  SEPARATORS
+} separator_type;
 
 /*static const char *token_names[TOKENS] = {
   "keyword"
@@ -41,15 +45,15 @@ typedef struct token_list {
 
 typedef struct tree_command {
   tree_type      type;
-  token_list*    list;
+  token**        tokens;
 } tree_command;
-typedef struct tree_sequence {
+typedef struct tree_separator {
   tree_type      type;
-  tree_command** commands;
-} tree_sequence;
+  separator_type separator;
+} tree_separator;
 
 typedef struct tree {
-  tree_sequence** sequences;
+  void** sequence;
 } tree;
 
 token_list *scan_line(char *line);
@@ -64,6 +68,7 @@ token_keyword *consume_keyword(char**);
 
 // Utilities
 char consume_string_escape_sequence(char**);
+void print_token(token *t);
 void print_token_list(token_list* tl);
 
 #endif

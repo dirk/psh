@@ -31,10 +31,11 @@ void read_line() {
   while((line = readline("psh> ")) != NULL) {
     // printf("echo: %s\n", line);
     
-    token_list *list = scan_line(line);
+    token_list *l = scan_line(line);
+    tree*       t = parse_list(l);
     
-    print_token_list(list);
-    printf("\n");
+    //print_token_list(l);
+    //printf("\n");
     
     add_history(line); free(line);
   }

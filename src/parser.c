@@ -8,9 +8,67 @@
 token_list *new_token_list() {
   token_list *tl = malloc(sizeof(token_list));
   tl->tokens = malloc(sizeof(void) * TOKEN_LIST_SIZE);
+  tl->tokens[0] = NULL;
   return tl;
 }
+void free_token_list(token_list *tl) {
+  // TODO: Free individual tokens too
+  free(tl->tokens);
+  free(tl);
+}
 
+tree* new_tree() {
+  tree* t = malloc(sizeof(tree));
+  t->sequence = malloc(sizeof(void) * TREE_SEQUENCE_SIZE);
+  t->sequence[0] = NULL;
+  return t;
+}
+
+void print_command(tree_command *command) {
+  printf("cmd(");
+  token **tokens = command->tokens;
+  while(*tokens != NULL) {
+    token *t = *tokens;
+    print_token(t);
+    printf(" ");
+    tokens++;
+  }
+  printf("\b)\n");
+}
+
+void parse_command(token ***tokens_ptr, void **command_ptr) {
+  token **tokens = *tokens_ptr;
+  // Set up the command
+  tree_command* c = malloc(sizeof(tree_command));
+  c->type   = TCOMMAND;
+  c->tokens = malloc(sizeof(void) * TREE_SEQUENCE_SIZE);
+  *command_ptr = c;
+  
+  token *t;
+  int i = 0;
+  while((t = tokens[i]) && t != NULL) {
+    // token *t = *tokens;
+    // printf("%d t: %p\n", i, t);
+    c->tokens[i] = t;
+    i += 1;
+  }
+  c->tokens[i] = NULL;
+  // Update the parent's tokens pointer.
+  *tokens_ptr = &tokens[i];
+}
+
+// Parse a token list into a tree of commands/expressions/etc.
+tree *parse_list(token_list *list) {
+  tree *t = new_tree();
+  
+  token** tokens = list->tokens;
+  int    ci    = 0; // Command index
+  while(*tokens != NULL) {
+    parse_command(&tokens, &t->sequence[ci]);
+    print_command(t->sequence[ci]);
+  }
+  return t;
+}
 
 
 token_list *scan_line(char *line) {
