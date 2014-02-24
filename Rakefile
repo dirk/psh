@@ -1,6 +1,7 @@
 
 # LDFLAGS = '-lncurses'
 LDFLAGS = '-lreadline'
+CFLAGS = '-Wall -g'
 
 desc "Compile dependencies"
 task 'deps' => ['deps/linenoise/linenoise.o']
@@ -13,11 +14,11 @@ file 'psh' => [
   # Deps
   # 'deps/linenoise/linenoise.o'
 ] do |t|
-  sh "cc -o #{t.name} #{t.prerequisites.join ' '} #{LDFLAGS}"
+  sh "cc -o #{t.name} #{t.prerequisites.join ' '} #{LDFLAGS} #{CFLAGS}"
 end
 
 rule '.o' => ['.c'] do |t|
-  sh "cc #{t.source} -c -Wall -o #{t.name}"
+  sh "cc #{t.source} -c #{CFLAGS} -o #{t.name}"
 end
 
 desc "Run"

@@ -34,6 +34,35 @@ token_list *parse_line(char *line) {
 bool is_letter(char c) {
   return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 }
+bool is_underscore(char c) {
+  return c == '_';
+}
+bool is_number(char c) {
+  return (c >= '0' && c <= '9');
+}
+bool is_parentheses(char c) {
+  return (c == '(' || c == ')');
+}
+
+bool is_word_character(char c) {
+  return (
+    is_letter(c) ||
+    is_underscore(c) ||
+    is_number(c) ||
+    is_parentheses(c) ||
+    c == '-' ||
+    c == '.' ||
+    c == '#' ||
+    c == '\''
+  );
+}
+
+void consume_whitespace(char **pos_ptr) {
+  char *pos = *pos_ptr;
+  while(*pos == ' ' || *pos == '\t') { pos++; }
+  *pos_ptr = pos;
+}
+
 
 token_keyword *consume_keyword(char **pos_ptr) {
   char *pos = *pos_ptr;
@@ -57,22 +86,17 @@ token_keyword *consume_keyword(char **pos_ptr) {
   }
   return NULL;
 }
-void consume_whitespace(char **pos_ptr) {
-  char *pos = *pos_ptr;
-  while(*pos == ' ' || *pos == '\t') { pos++; }
-  *pos_ptr = pos;
-}
 
-token_string *consume_string(char **pos_ptr) {
+token_word *consume_string(char **pos_ptr) {
   char *pos = *pos_ptr;
   if(pos[0] != '"') return NULL;
   pos++;
   
   // Allocate the string
   // TODO: Make it use dynamic strings
-  char *s = malloc(sizeof(char) * MAX_STRING_LENGTH);
+  char *s = malloc(sizeof(char) * MAX_WORD_LENGTH);
   int si = 0;
-  while(*pos != '"' && si < (MAX_STRING_LENGTH - 1)) {
+  while(*pos != '"' && si < (MAX_WORD_LENGTH - 1)) {
     char c = *pos;
     pos++;
     
@@ -85,10 +109,11 @@ token_string *consume_string(char **pos_ptr) {
     s[si] = sc;
     si++; // Advance destination index
   }
+  s[si] = '\0'; // End the string
   pos++; // Move beyond closing quote
   *pos_ptr = pos;
-  token_string* str = malloc(sizeof(token_string));
-  str->type = TSTRING;
+  token_word* str = malloc(sizeof(token_word));
+  str->type = TWORD;
   str->contents = s;
   return str;
 }
@@ -115,6 +140,25 @@ char consume_string_escape_sequence(char **src_ptr) {
   return '\0';
 }
 
+token_word *consume_word(char **pos_ptr) {
+  char *pos = *pos_ptr;
+  // Check we have a word to start off with
+  if(!is_word_character(pos[0])) return NULL;
+  // TODO: Dynamicize this string
+  char *s = malloc(sizeof(char) * MAX_WORD_LENGTH);
+  int   i = 0;
+  while(is_word_character(pos[i]) && i < (MAX_WORD_LENGTH - 1)) {
+    s[i] = pos[i];
+    i++;
+  }
+  s[i] = '\0';
+  *pos_ptr = &pos[i];
+  token_word* str = malloc(sizeof(token_word));
+  str->type = TWORD;
+  str->contents = s;
+  return str;
+}
+
 bool parse_token(char **pos_ptr, token **token_ptr) {
   token* t;
   consume_whitespace(pos_ptr);
@@ -124,6 +168,9 @@ bool parse_token(char **pos_ptr, token **token_ptr) {
     // printf("keyword: %s (%p)\n", ((token_keyword*)t)->name, t);
   } else
   if((t = (token*)consume_string(pos_ptr)) && t != NULL) {
+    
+  } else
+  if((t = (token*)consume_word(pos_ptr)) && t != NULL) {
     
   }
   // If a token was found then update the token pointer.
@@ -136,8 +183,8 @@ bool parse_token(char **pos_ptr, token **token_ptr) {
 }//parse_token
 
 void print_token(token *t) {
-  if(t->type == TSTRING) {
-    printf("\"%s\"", ((token_string*)t)->contents);
+  if(t->type == TWORD) {
+    printf("\"%s\"", ((token_word*)t)->contents);
   } else if(t->type == TKEYWORD) {
     printf(":%s", ((token_keyword*)t)->name);
   } else {
