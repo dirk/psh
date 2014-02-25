@@ -8,10 +8,12 @@
 typedef enum {
   TKEYWORD,
   TWORD,
+  TSEPARATOR,
   TOKENS
 } token_type;
 
 typedef enum {
+  TTREE,
   TCOMMAND,
   TREES
 } tree_type;
@@ -37,6 +39,10 @@ typedef struct token_word {
   token_type type;
   char      *contents;
 } token_word;
+typedef struct token_separator {
+  token_type     type;
+  separator_type separator;
+} token_separator;
 
 typedef struct token_list {
   token** tokens;
@@ -53,7 +59,8 @@ typedef struct tree_separator {
 } tree_separator;
 
 typedef struct tree {
-  void** sequence;
+  tree_type type;
+  void**    sequence;
 } tree;
 
 token_list *scan_line(char *line);
@@ -70,5 +77,6 @@ token_keyword *consume_keyword(char**);
 char consume_string_escape_sequence(char**);
 void print_token(token *t);
 void print_token_list(token_list* tl);
+void print_tree(tree* t);
 
 #endif

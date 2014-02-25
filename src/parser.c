@@ -33,20 +33,32 @@ void print_command(tree_command *command) {
     printf(" ");
     tokens++;
   }
-  printf("\b)\n");
+  printf("\b)");
 }
 
-void parse_command(token ***tokens_ptr, void **command_ptr) {
+int parse_command(token ***tokens_ptr, void **command_ptr) {
   token **tokens = *tokens_ptr;
+  token *t;
+  
+  t = tokens[0];
+  if(t == NULL) return 1;
+  if(t->type != TWORD) return 1;
+  
   // Set up the command
   tree_command* c = malloc(sizeof(tree_command));
   c->type   = TCOMMAND;
   c->tokens = malloc(sizeof(void) * TREE_SEQUENCE_SIZE);
   *command_ptr = c;
   
-  token *t;
   int i = 0;
   while((t = tokens[i]) && t != NULL) {
+    if(t->type == TSEPARATOR) {
+      break;
+    }
+    if(t->type != TWORD) {
+      fprintf(stderr, "Unexpected token type: %d\n", t->type); // TODO: Return exception
+      return 1; // TODO: Leaking
+    }
     // token *t = *tokens;
     // printf("%d t: %p\n", i, t);
     c->tokens[i] = t;
@@ -55,6 +67,7 @@ void parse_command(token ***tokens_ptr, void **command_ptr) {
   c->tokens[i] = NULL;
   // Update the parent's tokens pointer.
   *tokens_ptr = &tokens[i];
+  return 0;
 }
 
 // Parse a token list into a tree of commands/expressions/etc.
@@ -62,11 +75,42 @@ tree *parse_list(token_list *list) {
   tree *t = new_tree();
   
   token** tokens = list->tokens;
-  int    ci    = 0; // Command index
+  int     err    = 0;
+  int     ci     = 0; // Command index
   while(*tokens != NULL) {
-    parse_command(&tokens, &t->sequence[ci]);
-    print_command(t->sequence[ci]);
+    // printf("before: ");
+    // print_token(*tokens);
+    // printf("\n");
+    
+    if((*tokens)->type == TSEPARATOR) {
+      t->sequence[ci] = *tokens;
+      tokens++;
+      goto tail;
+    }
+    
+    /*
+    err: -1  = Didn't match
+          0  = Matched
+          1+ = Error
+    */
+    err = parse_command(&tokens, &t->sequence[ci]);
+    if(err != 0) break;
+    if(err == 0) {
+      // print_command(t->sequence[ci]);
+      goto tail;
+    }
+    
+    print_token(*tokens);
+    
+  tail:
+    ci += 1;
   }
+  if(err != 0) {
+    fprintf(stderr, "Parse error: %d\n", err);
+    return NULL;
+  }
+  // Ensure NULL-terminated
+  t->sequence[ci] = NULL;
   return t;
 }
 
@@ -219,6 +263,19 @@ token_word *consume_word(char **pos_ptr) {
   return str;
 }
 
+token_separator *consume_separator(char **pos_ptr) {
+  char *pos = *pos_ptr;
+  
+  if(pos[0] == ';') {
+    token_separator* s = malloc(sizeof(token_separator));
+    s->type = TSEPARATOR;
+    s->separator = SCOLON;
+    *pos_ptr = &pos[1];
+    return s;
+  }
+  return NULL;
+}
+
 bool parse_token(char **pos_ptr, token **token_ptr) {
   token* t;
   consume_whitespace(pos_ptr);
@@ -231,6 +288,9 @@ bool parse_token(char **pos_ptr, token **token_ptr) {
     
   } else
   if((t = (token*)consume_word(pos_ptr)) && t != NULL) {
+    
+  } else
+  if((t = (token*)consume_separator(pos_ptr)) && t != NULL) {
     
   }
   // If a token was found then update the token pointer.
@@ -247,6 +307,8 @@ void print_token(token *t) {
     printf("\"%s\"", ((token_word*)t)->contents);
   } else if(t->type == TKEYWORD) {
     printf(":%s", ((token_keyword*)t)->name);
+  } else if(t->type == TSEPARATOR) {
+    printf("separator");
   } else {
     printf("unknown");
   }
@@ -259,4 +321,24 @@ void print_token_list(token_list* tl) {
     print_token(t); printf(" ");
     t_ptr++;
   }
+}
+
+void print_sequence(void **seq_ptr) {
+  void **seq = seq_ptr;
+  while(*seq != NULL) {
+    tree *s = (tree*)*seq;
+    if(s->type == TCOMMAND) {
+      print_command((tree_command*)s);
+    } else if(s->type == TSEPARATOR) {
+      print_token((token*)s);
+    } else {
+      printf("Unknown type: %d", s->type);
+    }
+    printf("\n");
+    seq++;
+  }
+}
+
+void print_tree(tree* t) {
+  print_sequence(t->sequence);
 }
