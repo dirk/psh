@@ -35,6 +35,7 @@ void read_line() {
     tree*       t = parse_list(l);
     
     //print_token_list(l);
+    print_tree(t);
     //printf("\n");
     
     add_history(line); free(line);
