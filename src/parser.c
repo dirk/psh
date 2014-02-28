@@ -88,44 +88,34 @@ int parse_separator(token ***tokens_ptr, void **command_ptr) {
 // Parse a token list into a tree of commands/expressions/etc.
 tree *parse_list(token_list *list) {
   tree *t = new_tree();
-  
+
   token** tokens = list->tokens;
   int     err    = 0;
   int     ci     = 0; // Command index
+
   while(*tokens != NULL) {
-    // printf("before: ");
-    // print_token(*tokens);
-    // printf("\n");
-    
     // Precedence rules:
-    // 1. Separators
-    // 2. Groups (parentheses)
-    // 3. Commands
-    
-    /*
-    err: -1  = Didn't match
-          0  = Matched
-          1+ = Error
-    */
-    
+    //   1. Separators
+    //   2. Groups (parentheses)
+    //   3. Commands
+    // Error codes:
+    //   -1  = Didn't match
+    //    0  = Matched
+    //    1+ = Error
+
     err = parse_separator(&tokens, &t->sequence[ci]);
     if(err > 0) break;
     if(err == 0) goto tail;
-    
+
     err = parse_command(&tokens, &t->sequence[ci]);
     if(err > 0) break;
-    if(err == 0) {
-      // print_command(t->sequence[ci]);
-      goto tail;
-    }
-    
+    if(err == 0) goto tail;
+
     if(err == -1) {
       fprintf(stderr, "Unable to match token type: %s (%d)\n", string_for_token_type((token_type)(*tokens)->type), (*tokens)->type);
       return (tree*)PERR_UNKOWN_TOKEN;
     }
-    
-    
-    
+
   tail:
     // if(*tokens != NULL) print_token(*tokens);
     ci += 1;
