@@ -6,6 +6,12 @@
 #define TREE_SEQUENCE_SIZE 1024
 
 typedef enum {
+  PERR_GENERIC = 1,
+  PERR_UNKOWN_TOKEN = 2,
+  PARSE_ERRORS
+} parse_error;
+
+typedef enum {
   TKEYWORD,
   TWORD,
   TSEPARATOR,
@@ -78,5 +84,9 @@ char consume_string_escape_sequence(char**);
 void print_token(token *t);
 void print_token_list(token_list* tl);
 void print_tree(tree* t);
+
+const char* human_name_for_parse_error(parse_error p);
+const char* string_for_token_type(token_type t);
+
 
 #endif

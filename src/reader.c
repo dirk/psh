@@ -34,8 +34,14 @@ void read_line() {
     token_list *l = scan_line(line);
     tree*       t = parse_list(l);
     
+    
     //print_token_list(l);
-    print_tree(t);
+    if((int)t >= PARSE_ERRORS) {
+      print_tree(t);
+    } else {
+      fprintf(stderr, "Parse error: %s\n", human_name_for_parse_error((parse_error)t));
+    }
+    
     //printf("\n");
     
     add_history(line); free(line);

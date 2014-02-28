@@ -41,8 +41,8 @@ int parse_command(token ***tokens_ptr, void **command_ptr) {
   token *t;
   
   t = tokens[0];
-  if(t == NULL) return 1;
-  if(t->type != TWORD) return 1;
+  if(t == NULL) return -1;
+  if(t->type != TWORD) return -1;
   
   // Set up the command
   tree_command* c = malloc(sizeof(tree_command));
@@ -70,6 +70,21 @@ int parse_command(token ***tokens_ptr, void **command_ptr) {
   return 0;
 }
 
+int parse_separator(token ***tokens_ptr, void **command_ptr) {
+  token **tokens = *tokens_ptr;
+  token *t;
+  
+  t = tokens[0];
+  if(t == NULL) return -1;
+  if(t->type != TSEPARATOR) return -1;
+  
+  // Add the command
+  *command_ptr = t;
+  // Then move the parent forwards one
+  (*tokens_ptr)++;
+  return 0;
+}
+
 // Parse a token list into a tree of commands/expressions/etc.
 tree *parse_list(token_list *list) {
   tree *t = new_tree();
@@ -82,27 +97,37 @@ tree *parse_list(token_list *list) {
     // print_token(*tokens);
     // printf("\n");
     
-    if((*tokens)->type == TSEPARATOR) {
-      t->sequence[ci] = *tokens;
-      tokens++;
-      goto tail;
-    }
+    // Precedence rules:
+    // 1. Separators
+    // 2. Groups (parentheses)
+    // 3. Commands
     
     /*
     err: -1  = Didn't match
           0  = Matched
           1+ = Error
     */
+    
+    err = parse_separator(&tokens, &t->sequence[ci]);
+    if(err > 0) break;
+    if(err == 0) goto tail;
+    
     err = parse_command(&tokens, &t->sequence[ci]);
-    if(err != 0) break;
+    if(err > 0) break;
     if(err == 0) {
       // print_command(t->sequence[ci]);
       goto tail;
     }
     
-    print_token(*tokens);
+    if(err == -1) {
+      fprintf(stderr, "Unable to match token type: %s (%d)\n", string_for_token_type((token_type)(*tokens)->type), (*tokens)->type);
+      return (tree*)PERR_UNKOWN_TOKEN;
+    }
+    
+    
     
   tail:
+    // if(*tokens != NULL) print_token(*tokens);
     ci += 1;
   }
   if(err != 0) {
@@ -341,4 +366,22 @@ void print_sequence(void **seq_ptr) {
 
 void print_tree(tree* t) {
   print_sequence(t->sequence);
+}
+
+static const char* parse_error_human_names[] = {
+  NULL,// 0
+  "generic",// 1
+  "unknown token"// 2
+};
+const char* human_name_for_parse_error(parse_error p) {
+  return parse_error_human_names[(int)p];
+}
+
+static const char* token_type_strings[] = {
+  "TKEYWORD",
+  "TWORD",
+  "TSEPARATOR",
+};
+const char* string_for_token_type(token_type t) {
+  return token_type_strings[(int)t];
 }
