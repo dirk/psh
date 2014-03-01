@@ -31,15 +31,14 @@ void read_line() {
   while((line = readline("psh> ")) != NULL) {
     // printf("echo: %s\n", line);
     
-    token_list *l = scan_line(line);
-    tree*       t = parse_list(l);
-    
-    
+    token_list *l = scan_line(line); printf("\x1b[30;1;22m(scanned)\x1b[0m\n");
+    tree*       t = parse_list(l);   printf("\x1b[30;1;22m(parsed: %p, %d)\x1b[0m\n", t, (int)t);
+
     //print_token_list(l);
-    if((int)t >= PARSE_ERRORS) {
-      print_tree(t);
-    } else {
+    if((int)t >= 0 && (int)t <= PARSE_ERRORS) {
       fprintf(stderr, "Parse error: %s\n", human_name_for_parse_error((parse_error)t));
+    } else {
+      print_tree(t);
     }
     
     //printf("\n");
