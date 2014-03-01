@@ -24,18 +24,6 @@ tree* new_tree() {
   return t;
 }
 
-void print_command(tree_command *command) {
-  printf("cmd(");
-  token **tokens = command->tokens;
-  while(*tokens != NULL) {
-    token *t = *tokens;
-    print_token(t);
-    printf(" ");
-    tokens++;
-  }
-  printf("\b)");
-}
-
 int parse_command(token ***tokens_ptr, void **command_ptr) {
   token **tokens = *tokens_ptr;
   token *t;
@@ -94,14 +82,14 @@ tree *parse_list(token_list *list) {
   int     ci     = 0; // Command index
 
   while(*tokens != NULL) {
-    // Precedence rules:
-    //   1. Separators
-    //   2. Groups (parentheses)
-    //   3. Commands
     // Error codes:
     //   -1  = Didn't match
     //    0  = Matched
     //    1+ = Error
+
+    // err = parse_group(&tokens, &t->sequence[ci]);
+    // if(err > 0) break;
+    // if(err == 0) goto tail;
 
     err = parse_separator(&tokens, &t->sequence[ci]);
     if(err > 0) break;
@@ -336,26 +324,6 @@ void print_token_list(token_list* tl) {
     print_token(t); printf(" ");
     t_ptr++;
   }
-}
-
-void print_sequence(void **seq_ptr) {
-  void **seq = seq_ptr;
-  while(*seq != NULL) {
-    tree *s = (tree*)*seq;
-    if(s->type == TCOMMAND) {
-      print_command((tree_command*)s);
-    } else if(s->type == TSEPARATOR) {
-      print_token((token*)s);
-    } else {
-      printf("Unknown type: %d", s->type);
-    }
-    printf("\n");
-    seq++;
-  }
-}
-
-void print_tree(tree* t) {
-  print_sequence(t->sequence);
 }
 
 static const char* parse_error_human_names[] = {

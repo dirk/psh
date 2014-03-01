@@ -6,6 +6,8 @@
 #include <strings.h>
 
 #include "psh.h"
+#include "parser.h"
+#include "debug.h"
 #include "reader.h"
 
 struct termios previous_attributes;

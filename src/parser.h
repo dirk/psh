@@ -88,5 +88,4 @@ void print_tree(tree* t);
 const char* human_name_for_parse_error(parse_error p);
 const char* string_for_token_type(token_type t);
 
-
 #endif
