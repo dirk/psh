@@ -24,6 +24,14 @@ tree* new_tree() {
   return t;
 }
 
+int command_length(tree_command *cmd) {
+  int length = 0;
+  while(cmd->tokens[length] != NULL) {
+    length += 1;
+  }
+  return length;
+}
+
 int parse_command(token ***tokens_ptr, void **command_ptr) {
   token **tokens = *tokens_ptr;
   token *t;
@@ -160,8 +168,12 @@ bool is_word_character(char c) {
     c == '-' ||
     c == '.' ||
     c == '#' ||
-    c == '\''
+    c == '\'' ||
+    c == '/'
   );
+}
+bool is_starting_word_character(char c) {
+  return (is_word_character(c) && c != '/');
 }
 
 void consume_whitespace(char **pos_ptr) {
@@ -250,7 +262,7 @@ char consume_string_escape_sequence(char **src_ptr) {
 token_word *consume_word(char **pos_ptr) {
   char *pos = *pos_ptr;
   // Check we have a word to start off with
-  if(!is_word_character(pos[0])) return NULL;
+  if(!is_starting_word_character(pos[0])) return NULL;
   // TODO: Dynamicize this string
   char *s = malloc(sizeof(char) * MAX_WORD_LENGTH);
   int   i = 0;

@@ -9,6 +9,7 @@
 #include "parser.h"
 #include "debug.h"
 #include "reader.h"
+#include "exec.h"
 
 struct termios previous_attributes;
 void reset_mode() {
@@ -35,6 +36,7 @@ void set_mode() {
 
 void setup() {
   setup_reader();
+  setup_exec();
 }
 void teardown() {
   teardown_reader();

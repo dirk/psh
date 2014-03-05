@@ -85,6 +85,8 @@ void print_token(token *t);
 void print_token_list(token_list* tl);
 void print_tree(tree* t);
 
+int command_length(tree_command*);
+
 const char* human_name_for_parse_error(parse_error p);
 const char* string_for_token_type(token_type t);
 
