@@ -1,0 +1,1 @@
+- BUG: Doesn't properly check for matching quotes (") at the end of lines.
