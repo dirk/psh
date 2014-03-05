@@ -9,7 +9,10 @@
 #include "eval.h"
 
 int eval_tree(tree* t) {
+  printf("\x1b[30;1;22m");//grey
   print_tree(t);
+  printf("\x1b[0m");//reset
+  fflush(stdout);
   
   int status = 0;
   
@@ -36,6 +39,7 @@ int eval_command(tree_command *cmd) {
     token_word *word = (token_word*)(cmd->tokens[i]);
     argv[i] = word->contents;
   }
+  argv[length] = NULL;
   
   char path[PATH_MAX];
   char *res;
@@ -46,8 +50,15 @@ int eval_command(tree_command *cmd) {
   }
   if(res == NULL) {
     printf("Not found: %s\n", argv[0]);
+  } else {
+    printf("\x1b[30;1;22m");//grey
+    printf("(path: %s)\n", path);
+    printf("\x1b[0m");//reset
+    fflush(stdout);
+    
+    exec_command(path, argv);
   }
-  printf("path: %s\n", path);
+  
   
   return 0;
 }
