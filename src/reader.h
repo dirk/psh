@@ -12,4 +12,8 @@ void teardown_reader();
 
 void read_line();
 
+#define PSH_HISTORY ".psh_history"
+// Computes (and memoizes) the path to the history file.
+char *get_history_path();
+
 #endif

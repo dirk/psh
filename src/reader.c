@@ -47,3 +47,14 @@ void read_line() {
     add_history(line); free(line);
   }
 }
+
+char *get_history_path() {
+  static char *hp;
+  if(hp != NULL) return hp;
+  hp = malloc(sizeof(char) * 1024); // TODO: Maybe fix hard-coding
+  hp[0] = '\0';
+  strcat(hp, getenv("HOME"));
+  strcat(hp, "/");
+  strcat(hp, PSH_HISTORY);
+  return hp;
+}

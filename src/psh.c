@@ -42,17 +42,6 @@ void teardown() {
   teardown_reader();
 }
 
-char *get_history_path() {
-  static char *hp;
-  if(hp != NULL) return hp;
-  hp = malloc(sizeof(char) * 1024); // TODO: Maybe fix hard-coding
-  hp[0] = '\0';
-  strcat(hp, getenv("HOME"));
-  strcat(hp, "/");
-  strcat(hp, PSH_HISTORY);
-  return hp;
-}
-
 void sig_handler(int s) {
   if(s == SIGINT) {
     teardown();
