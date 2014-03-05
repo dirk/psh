@@ -1,1 +1,2 @@
 - BUG: Doesn't properly check for matching quotes (") at the end of lines.
+- FEATURE: Implement basic commands (eg. ":cd /usr/local", ":set $var value").
