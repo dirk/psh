@@ -30,9 +30,24 @@ void parse_path() {
     }
     pi += 1;
   }
+  path[di] = NULL;// Terminator
 }
 char *find_in_path(char *f, char *dest) {
-  // TODO: Make it actually look through the path
+  int i = 0;
+  while(path[i] != NULL) {
+    // Use dest as a buffer to build the path in.
+    // TODO: Buffer overflow error/vuln. here.
+    dest[0] = '\0';
+    strcat(dest, path[i]);
+    strcat(dest, "/");
+    strcat(dest, f);
+    // Test if can access and execute it.
+    if(access(dest, X_OK) != -1) {
+      return dest;
+    }
+    i += 1;
+  }
+  dest[0] = '\0';// Just to be safe.
   return NULL;
 }
 

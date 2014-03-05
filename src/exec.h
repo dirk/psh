@@ -8,4 +8,6 @@ extern char **environ;
 void setup_exec();
 char *find_in_path(char *file, char *dest);
 
+int exec_command(char *filename, char** argv);
+
 #endif
