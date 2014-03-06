@@ -5,6 +5,7 @@
 #include <term.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <limits.h>
 
 #include "psh.h"
 #include "reader.h"
@@ -48,10 +49,10 @@ void read_line() {
   }
 }
 
+static char *hp = NULL;
 char *get_history_path() {
-  static char *hp;
   if(hp != NULL) return hp;
-  hp = malloc(sizeof(char) * 1024); // TODO: Maybe fix hard-coding
+  hp = malloc(sizeof(char) * PATH_MAX);
   hp[0] = '\0';
   strcat(hp, getenv("HOME"));
   strcat(hp, "/");
