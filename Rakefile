@@ -31,4 +31,23 @@ task 'clean' do |t|
   sh "rm -v **/*.o"
 end
 
+# desc "Compile tests"
+file 'psh_test' => [
+  # Sources
+  'test/unit/test.o',
+  # Main to ensure we have all of psh built
+  'psh'
+] do |t|
+  test_without_psh = t.prerequisites - ['psh']
+  psh_without_main = Rake::Task['psh'].prerequisites - ['src/psh.o']
+  sh "cc -o #{t.name} #{test_without_psh.join ' '} #{psh_without_main.join ' '} #{LDFLAGS} #{CFLAGS + " -Wno-unused-variable"}"
+end
+
+namespace 'test' do
+  desc "Run unit tests"
+  task 'unit' => ['psh_test'] do
+    sh "./psh_test"
+  end
+end
+
 task 'default' => ['psh', 'run']
