@@ -17,5 +17,10 @@
 *.out
 *.app
 
+# Generated source files
+*.tab.*
+*.yy.*
+
 # Binaries
 psh
+psh_test

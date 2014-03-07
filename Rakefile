@@ -21,6 +21,16 @@ rule '.o' => ['.c'] do |t|
   sh "cc #{t.source} -c #{CFLAGS} -o #{t.name}"
 end
 
+file 'src/parser.c' => ['src/scan.yy.c', 'src/parse.tab.c']
+desc "Build Bison parser"
+file 'src/parse.tab.c' => ['src/parse.y'] do
+  sh "bison -d -o src/parse.tab.c src/parse.y"
+end
+desc "Build Flex scanner"
+file 'src/scan.yy.c' => ['src/scan.l'] do
+  sh "flex src/scan.l"
+end
+
 desc "Run"
 task 'run' do |t|
   sh "./psh"
@@ -28,6 +38,8 @@ end
 
 desc "Clean"
 task 'clean' do |t|
+  sh "rm src/parse.tab.*"
+  sh "rm src/scan.yy.*"
   sh "rm -v **/*.o"
 end
 
