@@ -23,6 +23,10 @@ typedef enum {
   TREXPRESSION,
   TRWORD,
   TRWORD_LIST,
+  TRITEM,
+  TRGROUP,
+  TRSEQUENCE_LIST,
+  TRBODY,
   TREES
 } tree_type;
 
@@ -86,6 +90,32 @@ typedef struct tr_command {
 } tr_command;
 tr_command *new_tr_command();
 
+typedef struct tr_expression {
+  tree_type type;
+  char*     keyword;
+  void*     body;
+} tr_expression;
+tr_expression *new_tr_expression();
+
+typedef struct tr_sequence {
+  tree_type           type;// TRITEM or TRGROUP
+  void*               item;
+  struct tr_sequence* next;
+  struct tr_sequence* prev;
+} tr_sequence;
+tr_sequence *new_tr_sequence();
+
+typedef struct tr_sequence_list {
+  tree_type    type;
+  tr_sequence* head;
+} tr_sequence_list;
+tr_sequence_list *new_tr_sequence_list();
+
+typedef struct tr_body {
+  tree_type         type;
+  tr_sequence_list* list;
+} tr_body;
+tr_body *new_tr_body();
 
 typedef struct tree_separator {
   tree_type      type;

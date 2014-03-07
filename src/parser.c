@@ -50,6 +50,37 @@ tr_command *new_tr_command() {
   return cmd;
 }
 
+tr_expression *new_tr_expression() {
+  tr_expression *expr = malloc(sizeof(tr_expression));
+  expr->type = TREXPRESSION;
+  expr->keyword = NULL;
+  expr->body = NULL;
+  return expr;
+}
+
+tr_body *new_tr_body() {
+  tr_body *body = malloc(sizeof(tr_body));
+  body->type = TRBODY;
+  body->list = NULL;
+  return body;
+}
+
+tr_sequence *new_tr_sequence() {
+  tr_sequence *seq = malloc(sizeof(tr_sequence));
+  seq->type = TRITEM;// Default to TRITEM
+  seq->item = NULL;
+  seq->prev = NULL;
+  seq->next = NULL;
+  return seq;
+}
+
+tr_sequence_list *new_tr_sequence_list() {
+  tr_sequence_list *list = malloc(sizeof(tr_sequence_list));
+  list->type = TRSEQUENCE_LIST;
+  list->head = NULL;
+  return list;
+}
+
 int command_length(tr_command *cmd) {
   int length = 0;
   //while(cmd->tokens[length] != NULL) {

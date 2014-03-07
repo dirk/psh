@@ -34,7 +34,7 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
 %error-verbose
 
 %token <lstring> TWORD;
-%token TKEYWORD;
+%token <lstring> TKEYWORD;
 %token TLPAREN;
 %token TRPAREN;
 %token TSEPARATOR;
@@ -44,16 +44,46 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
 %type <ptree> cmd;
 %type <ptree> word;
 %type <ptree> words;
+%type <ptree> expr;
+%type <ptree> sequence;
+%type <ptree> body;
 
 %%
-main: sequences { /* fprintf(stderr, "main exprs = %p\n", $1); *head = $1; */ };
+main: body { /* fprintf(stderr, "main exprs = %p\n", $1); *head = $1; */ };
 
-sequences: sequence separators sequences;
-sequences: sequence separators
-sequences: sequence;
+body: sequence separators body {
+  tr_body  *body = $3;
+  tr_sequence_list *sl = body->list;
+  
+  tr_sequence *left = $1;
+  tr_sequence *right = sl->head;
+  
+  left->next  = right;
+  right->prev = left;
+  sl->head    = left;
+  $$ = body;
+};
+body: sequence separators | sequence {
+  tr_body        *body = new_tr_body();
+  tr_sequence_list *sl = new_tr_sequence_list();
+  tr_sequence       *s = $1;
+  body->list = sl;
+  sl->head   = s;
+  $$ = body;
+};
 
-sequence: item;
-sequence: TLPAREN sequences TRPAREN;
+sequence: item {
+  tr_sequence *s = new_tr_sequence();
+  s->type = TRITEM;
+  s->item = $1;
+  $$ = s;
+};
+sequence: TLPAREN body TRPAREN {
+  tr_sequence *s = new_tr_sequence();
+  s->type = TRGROUP;
+  s->item = $2;
+  $$ = s;
+};
 
 item: expr { $$ = NULL; }
     | cmd { $$ = $1; };
@@ -83,8 +113,17 @@ word: TWORD {
   $$ = w;
 };
 
-expr: TKEYWORD;
-expr: TKEYWORD sequence;
+expr: TKEYWORD {
+  tr_expression *expr = new_tr_expression();
+  expr->keyword = $1;
+  $$ = expr;
+};
+expr: TKEYWORD sequence {
+  tr_expression *expr = new_tr_expression();
+  expr->keyword = $1;
+  expr->body = $2;
+  $$ = expr;
+};
 
 separators: separator separators;
 separators: separator;
