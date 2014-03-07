@@ -17,7 +17,7 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
   char* lstring;
   int   lint;
   float lfloat;
-  void* lvoid;
+  void* ptree;
 }
 
 %code requires {
@@ -33,41 +33,62 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
 
 %error-verbose
 
-%token TWORD;
+%token <lstring> TWORD;
 %token TKEYWORD;
 %token TLPAREN;
 %token TRPAREN;
 %token TSEPARATOR;
 
 // %type <tree> tree;
-// %type <tree_expression> expr;
-// %type <tree_command> cmd;
-// %type <token_word> word;
+%type <ptree> item;
+%type <ptree> cmd;
+%type <ptree> word;
+%type <ptree> words;
 
 %%
 main: sequences { /* fprintf(stderr, "main exprs = %p\n", $1); *head = $1; */ };
 
-//sequences: sequence separators sequences;
-//sequences: sequence separators
+sequences: sequence separators sequences;
+sequences: sequence separators
 sequences: sequence;
 
 sequence: item;
 sequence: TLPAREN sequences TRPAREN;
 
-item: expr
-    | cmd;
+item: expr { $$ = NULL; }
+    | cmd { $$ = $1; };
 
-cmd: words;
-words: word words;
-words: word;
-word: TWORD;
+cmd: words {
+  tr_command *cmd = new_tr_command();
+  cmd->list = $1;
+  $$ = cmd;
+}
+words: word words {
+  tr_word_list *list = $2;
+  tr_word *left = $1;
+  tr_word *right = list->head;
+  left->next = right;
+  right->prev = left;
+  list->head = left;
+  $$ = list;
+}
+words: word {
+  tr_word_list* list = new_tr_word_list();
+  list->head = $1;
+  $$ = list;
+};
+word: TWORD {
+  tr_word* w = new_tr_word();
+  w->value = $1;
+  $$ = w;
+};
 
 expr: TKEYWORD;
 expr: TKEYWORD sequence;
 
-// separators: separator separators;
-// separators: separator;
-// separator: TSEPARATOR;
+separators: separator separators;
+separators: separator;
+separator: TSEPARATOR;
 
 %%
 

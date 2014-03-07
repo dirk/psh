@@ -27,11 +27,34 @@ tree* new_tree() {
   return t;
 }
 
-int command_length(tree_command *cmd) {
+tr_word *new_tr_word() {
+  tr_word* word = malloc(sizeof(tr_word));
+  word->type = TRWORD;
+  word->value = NULL;
+  word->next  = NULL;
+  word->prev  = NULL;
+  return word;
+}
+
+tr_word_list *new_tr_word_list() {
+  tr_word_list* list = malloc(sizeof(tr_word_list));
+  list->type = TRWORD_LIST;
+  list->head = NULL;
+  return list;
+}
+
+tr_command *new_tr_command() {
+  tr_command *cmd = malloc(sizeof(tr_command));
+  cmd->type = TRCOMMAND;
+  cmd->list = NULL;
+  return cmd;
+}
+
+int command_length(tr_command *cmd) {
   int length = 0;
-  while(cmd->tokens[length] != NULL) {
-    length += 1;
-  }
+  //while(cmd->tokens[length] != NULL) {
+  //  length += 1;
+  //}
   return length;
 }
 

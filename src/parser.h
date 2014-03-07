@@ -21,6 +21,8 @@ typedef enum {
   TRTREE,
   TRCOMMAND,
   TREXPRESSION,
+  TRWORD,
+  TRWORD_LIST,
   TREES
 } tree_type;
 
@@ -62,10 +64,29 @@ typedef enum {
   EXPRESSIONS
 } expression_type;
 
-typedef struct tree_command {
+
+typedef struct tr_word {
+  tree_type type;
+  char*     value;
+  
+  struct tr_word*  next;
+  struct tr_word*  prev;
+} tr_word;
+tr_word *new_tr_word();
+
+typedef struct tr_word_list {
+  tree_type type;
+  tr_word*  head;
+} tr_word_list;
+tr_word_list *new_tr_word_list();
+
+typedef struct tr_command {
   tree_type      type;
-  token**        tokens;
-} tree_command;
+  tr_word_list*  list;
+} tr_command;
+tr_command *new_tr_command();
+
+
 typedef struct tree_separator {
   tree_type      type;
   separator_type separator;
@@ -99,7 +120,7 @@ void print_token(token *t);
 void print_token_list(token_list* tl);
 void print_tree(tree* t);
 
-int command_length(tree_command*);
+int command_length(tr_command*);
 
 const char* human_name_for_parse_error(parse_error p);
 const char* string_for_token_type(token_type t);
