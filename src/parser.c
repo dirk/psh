@@ -20,12 +20,12 @@ void free_token_list(token_list *tl) {
   free(tl);
 }
 
-tree* new_tree() {
-  tree* t = malloc(sizeof(tree));
-  t->sequence = malloc(sizeof(void) * TREE_SEQUENCE_SIZE);
-  t->sequence[0] = NULL;
-  return t;
-}
+// tr_tree* new_tree() {
+//   tr_tree* t = malloc(sizeof(tr_tree));
+//   t->sequence = malloc(sizeof(void) * TREE_SEQUENCE_SIZE);
+//   t->sequence[0] = NULL;
+//   return t;
+// }
 
 tr_word *new_tr_word() {
   tr_word* word = malloc(sizeof(tr_word));
@@ -81,6 +81,13 @@ tr_sequence_list *new_tr_sequence_list() {
   return list;
 }
 
+tr_tree *new_tr_tree() {
+  tr_tree *tree = malloc(sizeof(tr_tree));
+  tree->type = TRTREE;
+  tree->body = NULL;
+  return tree;
+}
+
 int command_length(tr_command *cmd) {
   int length = 0;
   //while(cmd->tokens[length] != NULL) {
@@ -91,14 +98,15 @@ int command_length(tr_command *cmd) {
 
 extern int yydebug;
 
-tree *parse_string(char *string) {
+tr_tree *parse_string(char *string) {
   yydebug = 1;
   yyscan_t scanner;
   YY_BUFFER_STATE buffer;
   yylex_init(&scanner);
   buffer = yy_scan_string(string, scanner);
   
-  yyparse(scanner, "(none)");
+  tr_tree *tree = new_tr_tree();
+  yyparse(&tree->body, scanner, "(none)");
   
   yy_delete_buffer(buffer, scanner);
   yylex_destroy(scanner);
@@ -106,7 +114,7 @@ tree *parse_string(char *string) {
   return NULL;
 }
 
-tree *parse_line(char *line) {
+tr_tree *parse_line(char *line) {
   return parse_string(line);
 }
 

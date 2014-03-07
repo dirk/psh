@@ -128,15 +128,16 @@ typedef struct tree_expression {
   struct tree_expression* next;// Expression following this one
 } tree_expression;
 
-typedef struct tree {
+typedef struct tr_tree {
   tree_type type;
-  void**    sequence;
-} tree;
+  tr_body*  body;
+} tr_tree;
+tr_tree *new_tr_tree();
 
 token_list *scan_line(char *line);
-tree *parse_list(token_list *list);
+tr_tree *parse_list(token_list *list);
 
-tree *parse_line(char *line);
+tr_tree *parse_line(char *line);
 
 // Scanning
 bool parse_token(char**, token**);
@@ -148,7 +149,7 @@ token_keyword *consume_keyword(char**);
 char consume_string_escape_sequence(char**);
 void print_token(token *t);
 void print_token_list(token_list* tl);
-void print_tree(tree* t);
+void print_tree(tr_tree* t);
 
 int command_length(tr_command*);
 

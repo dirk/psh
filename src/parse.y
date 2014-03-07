@@ -7,7 +7,7 @@ extern int yylex();
 extern int yyparse();
 extern int yylineno_extern;
 
-void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
+void yyerror(YYLTYPE* loc, tr_body **main, yyscan_t scanner, char* source, const char *err) {
   fprintf(stderr, "Parse error in %s on line %d: %s\n", source, yylineno_extern, err);
 }
 
@@ -27,7 +27,7 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
 %locations
 %pure-parser
 %lex-param { yyscan_t scanner }
-// %parse-param { sl_s_expr_t **head }
+%parse-param { tr_body **main }
 %parse-param { yyscan_t scanner }
 %parse-param { char* source }
 
@@ -47,9 +47,10 @@ void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
 %type <ptree> expr;
 %type <ptree> sequence;
 %type <ptree> body;
+%type <ptree> main;
 
 %%
-main: body { /* fprintf(stderr, "main exprs = %p\n", $1); *head = $1; */ };
+main: body { *main = $1; $$ = $1; };
 
 body: sequence separators body {
   tr_body  *body = $3;
