@@ -11,17 +11,11 @@ typedef enum {
   PARSE_ERRORS
 } parse_error;
 
-
-#define YYTOKENTYPE token_type
-
-typedef enum {
-  TKEYWORD,
-  TWORD,
-  TSEPARATOR,
-  TLPAREN,
-  TRPAREN,
-  TOKENS
-} token_type;
+#ifdef YYTOKENTYPE
+typedef YYTOKENTYPE token_type;
+#else
+typedef int token_type;
+#endif
 
 typedef enum {
   TRTREE,
@@ -109,5 +103,22 @@ int command_length(tree_command*);
 
 const char* human_name_for_parse_error(parse_error p);
 const char* string_for_token_type(token_type t);
+
+
+
+#define YYDEBUG 1
+
+#define YYLTYPE_IS_DECLARED
+typedef struct YYLTYPE {
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+} YYLTYPE;
+
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void* yyscan_t;
+#endif
 
 #endif

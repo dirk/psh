@@ -5,27 +5,23 @@
 
 extern int yylex();
 extern int yyparse();
-void yyerror(YYLTYPE* loc, sl_s_expr_t **head, yyscan_t scanner, char* source, const char *err);
 extern int yylineno_extern;
 
-/*
-%union {
-  char* p_string;
-  int   p_int;
-  float p_float;
-  void* p_node;
+void yyerror(YYLTYPE* loc, yyscan_t scanner, char* source, const char *err) {
+  fprintf(stderr, "Parse error in %s on line %d: %s\n", source, yylineno_extern, err);
 }
-*/
 
 %}
 
-%code requires {
-#ifndef YY_TYPEDEF_YY_SCANNER_T
-#define YY_TYPEDEF_YY_SCANNER_T
-typedef void* yyscan_t;
-#endif
+%union {
+  char* lstring;
+  int   lint;
+  float lfloat;
+  void* lvoid;
+}
 
-//define SOURCE(a) a->source = source; a->line = (yylloc.first_line);
+%code requires {
+//#define SOURCE(a) a->source = source; a->line = (yylloc.first_line);
 }
 
 %locations
@@ -49,10 +45,11 @@ typedef void* yyscan_t;
 // %type <token_word> word;
 
 %%
-main: sequences { /* DEBUG("main exprs = %p", $1); *head = $1; */ };
+main: sequences { /* fprintf(stderr, "main exprs = %p\n", $1); *head = $1; */ };
 
-sequences: sequence separators sequences;
-sequences: sequence separators | sequence;
+//sequences: sequence separators sequences;
+//sequences: sequence separators
+sequences: sequence;
 
 sequence: item;
 sequence: TLPAREN sequences TRPAREN;
@@ -68,12 +65,10 @@ word: TWORD;
 expr: TKEYWORD;
 expr: TKEYWORD sequence;
 
-separators: separator separators;
-separators: separator;
-separator: TSEPARATOR;
+// separators: separator separators;
+// separators: separator;
+// separator: TSEPARATOR;
 
 %%
 
-void yyerror(YYLTYPE* loc, sl_s_expr_t **head, yyscan_t scanner, char* source, const char *err) {
-  DEBUG("Parse error in %s on line %d: %s", source, yylineno_extern, err);
-}
+

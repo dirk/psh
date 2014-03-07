@@ -20,9 +20,9 @@ void print_sequence(void **seq_ptr) {
     tree *s = (tree*)*seq;
     if(s->type == TRCOMMAND) {
       print_command((tree_command*)s);
-    } else if(s->type == TSEPARATOR) {
+    }/* else if(s->type == TSEPARATOR) {
       printf("separator:"); print_token((token*)s);
-    } else {
+    }*/ else {
       printf("Unknown type: %d", s->type);
     }
     printf("\n");

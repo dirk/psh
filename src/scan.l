@@ -1,7 +1,8 @@
 %{
 #include <string.h>
 #include "psh.h"
-#include "parse.h"
+#include "parser.h"
+#include "parse.tab.h"
 
 
 #define SAVE_STRING yylval->p_string = strdup(yytext);
@@ -16,6 +17,8 @@ char *strclone(char *str);
 "$"{variable}            { yylval = strclone(yytext); return TVARIABLE; }
 */
 
+#define YY_NO_INPUT
+
 %}
 
 %option header-file="src/scan.yy.h"
@@ -29,7 +32,7 @@ char *strclone(char *str);
 %option bison-bridge bison-locations
 
 
-keyword     :[A-Za-z_]
+keyword     :[A-Za-z_]+
 comment     [ \t]*#[^\n]*
 
 hex       [0-9a-f]
@@ -46,16 +49,16 @@ word     [0-9A-Za-z][0-9A-Za-z_]*
 \r // Remove carriage returns
 [ \t]*#[^\n]* // Remove comments
 
-"\"\""|("\""{chars}"\"") { yylval = strclone(yytext); return TWORD; }
-{word}                   { yylval = strclone(yytext); return TWORD; }
+"\"\""|("\""{chars}"\"") { yylval->lstring = strclone(yytext); return TWORD; }
+{word}                   { fprintf(stderr, "word: %s\n", yytext); yylval->lstring = strclone(yytext); return TWORD; }
 
-{keyword}                { return TKEYWORD; }
+{keyword}                { fprintf(stderr, "kw: %s\n", yytext); return TKEYWORD; }
 
 "("                      { return TLPAREN; }
 ")"                      { return TRPAREN; }
-;                        { return TSEPARATOR; }
+;                        { fprintf(stderr, "sep: ;\n");  return TSEPARATOR; }
 
-\n+                      { return TSEPARATOR; }
+\n+                      { fprintf(stderr, "sep: \\n\n"); return TSEPARATOR; }
 [ \t\r] // Remove whitespace
 %%
 char *strclone(char *str)

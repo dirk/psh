@@ -35,8 +35,25 @@ int command_length(tree_command *cmd) {
   return length;
 }
 
-tree *parse_line(char *line) {
+extern int yydebug;
+
+tree *parse_string(char *string) {
+  yydebug = 1;
+  yyscan_t scanner;
+  YY_BUFFER_STATE buffer;
+  yylex_init(&scanner);
+  buffer = yy_scan_string(string, scanner);
+  
+  yyparse(scanner, "(none)");
+  
+  yy_delete_buffer(buffer, scanner);
+  yylex_destroy(scanner);
+  
   return NULL;
+}
+
+tree *parse_line(char *line) {
+  return parse_string(line);
 }
 
 /*
