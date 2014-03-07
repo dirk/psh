@@ -31,9 +31,18 @@ void teardown_reader() {
 void read_line() {
   char *line;
   while((line = readline("psh> ")) != NULL) {
-    // printf("echo: %s\n", line);
+    printf("echo: %s\n", line);
     
-    token_list *l = scan_line(line); printf("\x1b[30;1;22m(scanned)\x1b[0m\n");
+    tree *tr = parse_line(line);
+    
+    /*
+    token_list *l = scan_line(line);
+    printf("\x1b[30;1;22m");
+    printf("(scanned:\n");
+    print_token_list(l);
+    printf(")\x1b[0m\n");
+    fflush(stdout);
+
     tree*       t = parse_list(l);   printf("\x1b[30;1;22m(parsed: %p, %d)\x1b[0m\n", t, (int)t);
 
     // Check if it's an error.
@@ -42,9 +51,7 @@ void read_line() {
     } else {
       eval_tree(t);
     }
-    
-    //printf("\n");
-    
+    */
     add_history(line); free(line);
   }
 }

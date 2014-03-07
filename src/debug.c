@@ -18,10 +18,10 @@ void print_sequence(void **seq_ptr) {
   while(*seq != NULL) {
     _print_indent();
     tree *s = (tree*)*seq;
-    if(s->type == TCOMMAND) {
+    if(s->type == TRCOMMAND) {
       print_command((tree_command*)s);
     } else if(s->type == TSEPARATOR) {
-      print_token((token*)s);
+      printf("separator:"); print_token((token*)s);
     } else {
       printf("Unknown type: %d", s->type);
     }

@@ -5,6 +5,9 @@
 #include "psh.h"
 #include "parser.h"
 
+#include "parse.tab.h"
+#include "scan.yy.h"
+
 token_list *new_token_list() {
   token_list *tl = malloc(sizeof(token_list));
   tl->tokens = malloc(sizeof(void) * TOKEN_LIST_SIZE);
@@ -32,20 +35,25 @@ int command_length(tree_command *cmd) {
   return length;
 }
 
+tree *parse_line(char *line) {
+  return NULL;
+}
+
+/*
 int parse_command(token ***tokens_ptr, void **command_ptr) {
   token **tokens = *tokens_ptr;
   token *t;
-  
+
   t = tokens[0];
   if(t == NULL) return -1;
   if(t->type != TWORD) return -1;
-  
+
   // Set up the command
   tree_command* c = malloc(sizeof(tree_command));
   c->type   = TCOMMAND;
   c->tokens = malloc(sizeof(void) * TREE_SEQUENCE_SIZE);
   *command_ptr = c;
-  
+
   int i = 0;
   while((t = tokens[i]) && t != NULL) {
     if(t->type == TSEPARATOR) {
@@ -69,11 +77,11 @@ int parse_command(token ***tokens_ptr, void **command_ptr) {
 int parse_separator(token ***tokens_ptr, void **command_ptr) {
   token **tokens = *tokens_ptr;
   token *t;
-  
+
   t = tokens[0];
   if(t == NULL) return -1;
   if(t->type != TSEPARATOR) return -1;
-  
+
   // Add the command
   *command_ptr = t;
   // Then move the parent forwards one
@@ -81,11 +89,45 @@ int parse_separator(token ***tokens_ptr, void **command_ptr) {
   return 0;
 }
 
+int parse_expression(token ***tokens_ptr, void **expr_ptr) {
+  token **tokens = *tokens_ptr;
+  token *t;
+
+  t = tokens[0];
+  if(t == NULL) return -1;
+  
+  bool is_keyword = (t->type == TKEYWORD);
+  bool is_group   = (t->type == TSEPARATOR && (token_separator*)t->separator == SLPAREN);
+  if(!is_keyword && !is_group) return -1;
+
+  // Set up the expression
+  tree_expression* e = malloc(sizeof(tree_expression));
+  e->type   = TEXPRESSION;
+  e->list = malloc(sizeof(void) * TREE_SEQUENCE_SIZE);
+  *expr_ptr = e;
+
+  int i = 0;
+  while((t = tokens[i]) && t != NULL) {
+    if(t->type == TSEPARATOR && (token_separator*)t->separator == SRPAREN) {
+      break;
+    }
+    
+    tree *list = parse_list(tokens);
+    
+    c->tokens[i] = t;
+    i += 1;
+  }
+  c->tokens[i] = NULL;
+  // Update the parent's tokens pointer.
+  *tokens_ptr = &tokens[i];
+  return 0;
+}
+
 // Parse a token list into a tree of commands/expressions/etc.
-tree *parse_list(token_list *list) {
+tree *parse_list(token** tokens, bool is_group) {
   tree *t = new_tree();
 
-  token** tokens = list->tokens;
+  // token** tokens = list->tokens;
   int     err    = 0;
   int     ci     = 0; // Command index
 
@@ -100,6 +142,10 @@ tree *parse_list(token_list *list) {
     // if(err == 0) goto tail;
 
     err = parse_separator(&tokens, &t->sequence[ci]);
+    if(err > 0) break;
+    if(err == 0) goto tail;
+
+    err = parse_expression(&tokens, &t->sequence[ci]);
     if(err > 0) break;
     if(err == 0) goto tail;
 
@@ -126,13 +172,15 @@ tree *parse_list(token_list *list) {
 }
 
 
+
+
 token_list *scan_line(char *line) {
   token_list *tl = new_token_list();
   // Position in the token list
   int token_index = 0;
   // Position in the line
   char *pos = line;
-  
+
   while(parse_token(&pos, &tl->tokens[token_index])) {
     // Move to the next token slot
     token_index++;
@@ -141,6 +189,10 @@ token_list *scan_line(char *line) {
       // TODO: Free the list
       return NULL;
     }
+  }
+  if(*pos != '\0') {
+    fprintf(stderr, "Failed parsing entire line. Remaining: \"%s\"\n", pos);
+    return NULL;
   }
   tl->tokens[token_index] = NULL; // Make sure it's terminated
   return tl;
@@ -164,7 +216,7 @@ bool is_word_character(char c) {
     is_letter(c) ||
     is_underscore(c) ||
     is_number(c) ||
-    is_parentheses(c) ||
+    // is_parentheses(c) ||
     c == '-' ||
     c == '.' ||
     c == '#' ||
@@ -210,7 +262,7 @@ token_word *consume_string(char **pos_ptr) {
   char *pos = *pos_ptr;
   if(pos[0] != '"') return NULL;
   pos++;
-  
+
   // Allocate the string
   // TODO: Make it use dynamic strings
   char *s = malloc(sizeof(char) * MAX_WORD_LENGTH);
@@ -218,7 +270,7 @@ token_word *consume_string(char **pos_ptr) {
   while(*pos != '"' && si < (MAX_WORD_LENGTH - 1)) {
     char c = *pos;
     pos++;
-    
+
     char sc;
     if(c == '\\') {
       sc = consume_string_escape_sequence(&pos);
@@ -280,11 +332,14 @@ token_word *consume_word(char **pos_ptr) {
 
 token_separator *consume_separator(char **pos_ptr) {
   char *pos = *pos_ptr;
-  
-  if(pos[0] == ';') {
+  char c = *pos;
+
+  if(c == ';' || c == '(' || c == ')') {
     token_separator* s = malloc(sizeof(token_separator));
     s->type = TSEPARATOR;
-    s->separator = SCOLON;
+    if(c == ':') s->separator = SCOLON;
+    if(c == '(') s->separator = SLPAREN;
+    if(c == ')') s->separator = SRPAREN;
     *pos_ptr = &pos[1];
     return s;
   }
@@ -294,19 +349,19 @@ token_separator *consume_separator(char **pos_ptr) {
 bool parse_token(char **pos_ptr, token **token_ptr) {
   token* t;
   consume_whitespace(pos_ptr);
-  
+
   // Try to consume difference tokens
   if((t = (token*)consume_keyword(pos_ptr)) && t != NULL) {
     // printf("keyword: %s (%p)\n", ((token_keyword*)t)->name, t);
   } else
   if((t = (token*)consume_string(pos_ptr)) && t != NULL) {
-    
+
   } else
   if((t = (token*)consume_word(pos_ptr)) && t != NULL) {
-    
+
   } else
   if((t = (token*)consume_separator(pos_ptr)) && t != NULL) {
-    
+
   }
   // If a token was found then update the token pointer.
   // TODO: Refactor to return token pointer instead of bool.
@@ -316,6 +371,14 @@ bool parse_token(char **pos_ptr, token **token_ptr) {
   }
   return false;
 }//parse_token
+*/
+
+
+static const char separator_characters[] = {
+  ':',//SCOLON
+  '(',//SLPAREN
+  ')'//SRPAREN
+};
 
 void print_token(token *t) {
   if(t->type == TWORD) {
@@ -323,7 +386,7 @@ void print_token(token *t) {
   } else if(t->type == TKEYWORD) {
     printf(":%s", ((token_keyword*)t)->name);
   } else if(t->type == TSEPARATOR) {
-    printf("separator");
+    printf("%c", separator_characters[((token_separator*)t)->separator]);
   } else {
     printf("unknown");
   }

@@ -11,21 +11,29 @@ typedef enum {
   PARSE_ERRORS
 } parse_error;
 
+
+#define YYTOKENTYPE token_type
+
 typedef enum {
   TKEYWORD,
   TWORD,
   TSEPARATOR,
+  TLPAREN,
+  TRPAREN,
   TOKENS
 } token_type;
 
 typedef enum {
-  TTREE,
-  TCOMMAND,
+  TRTREE,
+  TRCOMMAND,
+  TREXPRESSION,
   TREES
 } tree_type;
 
 typedef enum {
   SCOLON,
+  SLPAREN,
+  SRPAREN,
   SEPARATORS
 } separator_type;
 
@@ -54,6 +62,11 @@ typedef struct token_list {
   token** tokens;
 } token_list;
 
+typedef enum {
+  EGROUP,
+  ECALL,
+  EXPRESSIONS
+} expression_type;
 
 typedef struct tree_command {
   tree_type      type;
@@ -63,6 +76,12 @@ typedef struct tree_separator {
   tree_type      type;
   separator_type separator;
 } tree_separator;
+typedef struct tree_expression {
+  tree_type type;
+  expression_type expression;
+  token_list* list;// List of tokens that composes the expression
+  struct tree_expression* next;// Expression following this one
+} tree_expression;
 
 typedef struct tree {
   tree_type type;
@@ -72,6 +91,7 @@ typedef struct tree {
 token_list *scan_line(char *line);
 tree *parse_list(token_list *list);
 
+tree *parse_line(char *line);
 
 // Scanning
 bool parse_token(char**, token**);
