@@ -8,14 +8,14 @@
 #include "exec.h"
 #include "eval.h"
 
-int eval_tree(tree* t) {
+int eval_tree(tr_tree* t) {
   printf("\x1b[30;1;22m");//grey
   print_tree(t);
   printf("\x1b[0m");//reset
   fflush(stdout);
 
   int status = 0;
-
+  /*
   void **sequence = t->sequence;
   tree *item;
   while((item = *sequence) && item != NULL) {
@@ -28,13 +28,14 @@ int eval_tree(tree* t) {
 
     sequence++;
   }
-
+  */
   return status;
 }
 
-int eval_command(tree_command *cmd) {
+int eval_command(tr_command *cmd) {
   // Command is a sequence of TWORD tokens
   // token **tokens = cmd->tokens;
+  /*
   int length = command_length(cmd);
   char *argv[length];
   for(int i = 0; i < length; i++) {
@@ -60,7 +61,6 @@ int eval_command(tree_command *cmd) {
 
     exec_command(path, argv);
   }
-
-
+  */
   return 0;
 }

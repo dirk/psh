@@ -35,7 +35,7 @@ void read_line() {
   while((line = readline("psh> ")) != NULL) {
     printf("echo: %s\n", line);
     
-    tree *tr = parse_line(line);
+    tr_tree *tr = parse_line(line);
     
     /*
     token_list *l = scan_line(line);
